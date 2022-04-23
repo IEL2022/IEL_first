@@ -1,0 +1,120 @@
+#include<stdio.h>
+#include<iostream>
+#include<string>
+using namespace std;
+string prefix;
+typedef struct node{
+	char ch;
+	struct node *left;
+	struct node *right;
+}node, *nodePtr;
+nodePtr create();//创建一棵二叉树 
+nodePtr find(nodePtr a, char p, char q);//找a树中p，q的最近祖先
+void traverse(nodePtr a, char p, char q, int &k);//遍历a树，看有没有p，q 
+void destroy(nodePtr a);//删除二叉树 
+void show(node *parent,node* root,string prefix);
+int main()
+{
+	cout<<"创建二叉树：以前序输入 空格代表空结点"<<endl;
+	nodePtr a = create();//创建二叉树
+	cout<<endl<<"输入查找的两个结点"<<endl;
+	char p, q;
+	cin>>p;
+	cin>>q;
+	cout<<endl<<"二叉树结构"<<endl<<endl;
+	show(a,a,prefix);
+	nodePtr b = find(a, p, q);//找a树中p，q的最近祖先
+	cout<<endl<<"共同祖先:"<<b->ch<<endl;	
+	destroy(a);//释放空间 
+	system("pause");
+	return 0;	 
+}
+nodePtr create()
+{
+	char ch;
+	nodePtr a;
+	scanf("%c",&ch);
+	if(ch == ' ')
+	{
+		return NULL;
+	}
+	else
+	{
+		a = new node;
+		a->ch = ch;
+		a->left = create();
+		a->right = create();
+		return a;
+	}
+}
+nodePtr find(nodePtr a, char p, char q)
+{
+	int left = 0, right = 0;
+	traverse(a->left, p, q, left);//找到左子树中节点个数 
+	traverse(a->right, p, q, right);//找到右子树中节点个数 
+	if(a->ch == p || a->ch == q)//如果当前结点为其中一个 
+	{
+		return a;//返回当前结点 
+	}
+	else if(left == right)//如果当前结点左右子树各有一个节点，返回当前结点 
+	{
+		return a;
+	}
+	else
+	{
+		//如果两个节点都在左子树中，那么在左子树中找，反之，在右子树中找 
+		if(left == 2)
+		{
+			find(a->left, p, q);
+		}
+		else
+		{
+			find(a->right, p, q);
+		}
+	}
+}
+void traverse(nodePtr a, char p, char q, int &k)
+{
+	if(a == NULL)
+	{
+		return;
+	}
+	else
+	{
+		if(a->ch == p || a->ch == q)
+		{
+			k++;	
+		}
+		traverse(a->left, p, q, k);
+		traverse(a->right, p, q, k);
+	}
+}
+void destroy(nodePtr a)
+{
+	if(a == NULL)
+	{
+		return;
+	}
+	else
+	{
+		destroy(a->left);
+		destroy(a->right);
+		delete a;
+	}
+}
+void show(node *parent,node* root,string prefix){
+    prefix += "|";
+    if (root){
+        cout << prefix<<"--" << root->ch << endl;
+        if (root==parent||root == parent->right){
+            prefix.pop_back(); prefix += " ";
+        }
+        show(root,root->left, prefix+"  ");
+        show(root,root->right, prefix+"  ");
+    }else{
+        if (parent->left || parent->right) //有一个孩子节点不空就打印，以区分左右孩子
+           cout << prefix << "--" << "{}"<< endl;
+    }
+
+}
+
